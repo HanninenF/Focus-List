@@ -6,6 +6,7 @@
     "dev": "next dev -p 58321",
     "build": "next build",
     "start": "next start -p 58321",
+    "sonar": "sonar-scanner",
     "desktop-shortcut": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\create-desktop-shortcut.ps1"
   },
   "dependencies": {
