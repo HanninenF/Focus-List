@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start -p 58321",
     "sonar": "sonar-scanner",
+    "sonar:issues": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\show-sonar-code-smells.ps1",
     "desktop-shortcut": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\create-desktop-shortcut.ps1"
   },
   "dependencies": {
