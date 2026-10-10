@@ -13,7 +13,7 @@ $encodedProjectKey = [Uri]::EscapeDataString($ProjectKey)
 $issuesUrl = "https://sonarcloud.io/api/issues/search?componentKeys=$encodedProjectKey&types=CODE_SMELL&resolved=false&ps=$PageSize"
 $issuesResponse = Invoke-RestMethod -Uri $issuesUrl -Headers $sonarHeaders -Method Get
 
-Write-Output "Code smells för $ProjectKey: $($issuesResponse.total)"
+Write-Output "Code smells för ${ProjectKey}: $($issuesResponse.total)"
 if ($issuesResponse.issues.Count -eq 0) {
   Write-Output "Inga öppna code smells hittades."
   exit 0
