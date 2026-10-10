@@ -1,5 +1,4 @@
 import type { CurrentWeather, WeatherService } from "@/src/core/ports/weather-service";
-
 export class OpenMeteoWeatherService implements WeatherService {
   async getCurrentWeather(): Promise<CurrentWeather> {
     const url = "https://api.open-meteo.com/v1/forecast?latitude=57.721&longitude=12.940&current=temperature_2m,weather_code,is_day&timezone=Europe%2FStockholm";
