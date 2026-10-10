@@ -71,6 +71,7 @@ if (-not $shouldBuild) {
   $sourceItems = @(
     Get-ChildItem -Path (Join-Path $repoRoot 'app') -Recurse -File
     Get-ChildItem -Path (Join-Path $repoRoot 'lib') -Recurse -File
+    Get-ChildItem -Path (Join-Path $repoRoot 'src') -Recurse -File
     Get-Item (Join-Path $repoRoot 'package.json')
     Get-Item (Join-Path $repoRoot 'next.config.ts')
     Get-Item (Join-Path $repoRoot 'tsconfig.json')

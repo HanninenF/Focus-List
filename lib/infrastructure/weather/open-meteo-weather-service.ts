@@ -1,4 +1,4 @@
-import type { CurrentWeather, WeatherService } from "@/lib/application/ports/weather-service";
+import type { CurrentWeather, WeatherService } from "@/src/core/ports/weather-service";
 
 export class OpenMeteoWeatherService implements WeatherService {
   async getCurrentWeather(): Promise<CurrentWeather> {

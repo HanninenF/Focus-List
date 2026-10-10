@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { getCurrentWeather } from "@/lib/application/get-current-weather";
-import { createWeatherService } from "@/lib/infrastructure/weather";
+import { getCurrentWeather } from "@/src/features/weather/get-current-weather";
+import { createWeatherService } from "@/src/infrastructure/weather";
 
 export const runtime = "nodejs";
 

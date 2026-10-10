@@ -8,6 +8,7 @@ export type Item = {
   title: string;
   completed: number;
   hasCheckbox: number;
+  focusId: number;
   createdAt: string;
 };
 

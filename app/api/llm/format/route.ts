@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { formatTodoText } from "@/lib/application/format-todo-text";
-import { createTextFormatter } from "@/lib/infrastructure/llm";
+import { formatTodoText } from "@/src/features/ai-formatting/format-todo-text";
+import { createTextFormatter } from "@/src/infrastructure/llm";
 
 export const runtime = "nodejs";
 

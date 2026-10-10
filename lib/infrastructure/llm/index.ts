@@ -1,4 +1,4 @@
-import type { TextFormatter } from "@/lib/application/ports/text-formatter";
+import type { TextFormatter } from "@/src/core/ports/text-formatter";
 import { OpenAiCompatibleTextFormatter } from "./openai-compatible-text-formatter";
 import { OllamaTextFormatter } from "./ollama-text-formatter";
 import { GeminiTextFormatter } from "./gemini-text-formatter";

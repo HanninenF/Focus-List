@@ -1,10 +1,1 @@
-export type CurrentWeather = {
-  temperature: number;
-  weatherCode: number;
-  isDay: boolean;
-  location: string;
-};
-
-export interface WeatherService {
-  getCurrentWeather(): Promise<CurrentWeather>;
-}
+export type { CurrentWeather, WeatherService } from "@/src/core/ports/weather-service";

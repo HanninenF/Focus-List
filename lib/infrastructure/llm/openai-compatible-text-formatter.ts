@@ -1,4 +1,4 @@
-import type { TextFormatter } from "@/lib/application/ports/text-formatter";
+import type { TextFormatter } from "@/src/core/ports/text-formatter";
 
 function getConfig() {
   return {

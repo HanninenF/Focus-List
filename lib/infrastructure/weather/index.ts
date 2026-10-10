@@ -1,4 +1,4 @@
-import type { WeatherService } from "@/lib/application/ports/weather-service";
+import type { WeatherService } from "@/src/core/ports/weather-service";
 import { OpenMeteoWeatherService } from "./open-meteo-weather-service";
 
 export function createWeatherService(): WeatherService {

@@ -1,4 +1,4 @@
-import type { TextFormatter } from "./ports/text-formatter";
+import type { TextFormatter } from "@/src/core/ports/text-formatter";
 
 const todoFormattingInstructions = [
   "Du är en svensk språkredaktör som hjälper till att strukturera todo-inlägg.",

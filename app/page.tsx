@@ -1,85 +1,24 @@
 "use client";
 
-import { FormEvent, ReactElement, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import Button from "@mui/material/Button";
-import Tooltip, { TooltipProps } from "@mui/material/Tooltip";
-import { marked } from "marked";
-import DOMPurify from "isomorphic-dompurify";
-
-type Item = { id: number; parentId: number | null; title: string; completed: number; hasCheckbox: number; focusId: number; createdAt: string };
-type FocusArea = { id: number; name: string; createdAt: string };
-type ThreadView = "all" | "active" | "completed";
-type Weather = { temperature: number; weatherCode: number; isDay: boolean; location: string };
-
-function StatusIcon({ state }: { state: "empty" | "started" | "done" }) {
-  if (state === "done") return <span className="status-icon done" aria-label="Klar">✓</span>;
-  if (state === "started") return <span className="status-icon started" aria-label="Påbörjad"><i /><i /><i /></span>;
-  return <span className="status-icon" aria-label="Inte påbörjad" />;
-}
-
-function toFocusSlug(name: string) {
-  return name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-}
-
-function focusNameFromSlug(slug?: string) {
-  return slug?.split("-").filter(Boolean).map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(" ") || "";
-}
-
-function weatherIcon(code: number, isDay: boolean) {
-  if (!isDay) {
-    if (code === 0) return "🌙";
-    if (code <= 3) return "🌙☁️";
-    if (code <= 48) return "🌫️";
-    if (code <= 67 || (code >= 80 && code <= 82)) return "🌧️";
-    if (code <= 77 || code >= 85) return "🌨️";
-    if (code >= 95) return "⛈️";
-  }
-  if (code === 0) return "☀️";
-  if (code <= 3) return "⛅";
-  if (code <= 48) return "🌫️";
-  if (code <= 67 || (code >= 80 && code <= 82)) return "🌧️";
-  if (code <= 77 || code >= 85) return "🌨️";
-  if (code >= 95) return "⛈️";
-  return "🌤️";
-}
-
-function highlightMatches(html: string, query: string) {
-  const trimmedQuery = query.trim();
-  if (!trimmedQuery) return html;
-  const escapedQuery = trimmedQuery.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const matcher = new RegExp(`(${escapedQuery})`, "gi");
-  return html.split(/(<[^>]+>)/g).map((part) => part.startsWith("<") ? part : part.replace(matcher, "<mark class=\"search-hit\">$1</mark>")).join("");
-}
-
-function makeMarkdownCheckboxesInteractive(html: string) {
-  return html.replace(/<input\b([^>]*\btype=["']checkbox["'][^>]*)>/gi, (_match, attributes: string) => {
-    const withoutDisabled = attributes.replace(/\sdisabled(?:=(?:""|"disabled"|'disabled'))?/i, "");
-    return `<input${withoutDisabled} class="markdown-checkbox">`;
-  });
-}
-
-function MarkdownText({ value, className = "", highlightQuery = "", onCheckboxToggle }: { value: string; className?: string; highlightQuery?: string; onCheckboxToggle?: (index: number, checked: boolean) => void }) {
-  let html = DOMPurify.sanitize(String(marked.parse(value, { breaks: true })));
-  if (onCheckboxToggle) html = makeMarkdownCheckboxesInteractive(html);
-  html = highlightMatches(html, highlightQuery);
-  return <div className={`markdown ${className}`} onClick={(event) => {
-    const target = event.target;
-    if (!(target instanceof HTMLInputElement) || target.type !== "checkbox" || !onCheckboxToggle) return;
-    event.stopPropagation();
-    const checkboxes = Array.from(event.currentTarget.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'));
-    const index = checkboxes.indexOf(target);
-    if (index >= 0) onCheckboxToggle(index, target.checked);
-  }} dangerouslySetInnerHTML={{ __html: html }} />;
-}
-
-function Tip({ title, children, placement = "top" }: { title: string; children: ReactElement; placement?: TooltipProps["placement"] }) {
-  return <Tooltip title={title} arrow enterDelay={700} placement={placement}>{children}</Tooltip>;
-}
+import type { FocusArea } from "@/src/core/domain/focus-area";
+import type { Item, ThreadView } from "@/src/core/domain/item";
+import { MarkdownText } from "@/src/features/markdown/components/MarkdownText";
+import { toggleChecklistItem } from "@/src/features/markdown/markdown-service";
+import { formatTextWithAi } from "@/src/features/ai-formatting/format-text";
+import { childrenOf as getChildrenOf, isRootDone as getIsRootDone, isRootStarted as getIsRootStarted, rootItems } from "@/src/features/todos/todo-rules";
+import { StatusIcon } from "@/src/features/todos/components/StatusIcon";
+import { itemMatchesQuery, normalizeSearchQuery } from "@/src/features/search/search-service";
+import { useWeather } from "@/src/features/weather/weather-hook";
+import { weatherIcon } from "@/src/features/weather/weather-icon";
+import { focusNameFromSlug, toFocusSlug } from "@/src/shared/utilities/focus-slug";
+import { Tip } from "@/src/shared/ui/Tip";
 
 export default function Home({ focusName }: { focusName?: string }) {
   const router = useRouter();
@@ -104,7 +43,7 @@ export default function Home({ focusName }: { focusName?: string }) {
   const [llmLoading, setLlmLoading] = useState(false);
   const [llmError, setLlmError] = useState("");
   const [todayLabel, setTodayLabel] = useState("");
-  const [weather, setWeather] = useState<Weather | null>(null);
+  const weather = useWeather();
 
   const activeFocusId = (focusName ? focusAreas.find((area) => toFocusSlug(area.name) === focusName)?.id : undefined) ?? focusAreas[0]?.id;
   const currentFocus = focusAreas.find((area) => area.id === activeFocusId);
@@ -116,28 +55,6 @@ export default function Home({ focusName }: { focusName?: string }) {
   useEffect(() => { fetch("/api/focus-areas", { cache: "no-store" }).then((response) => response.json()).then(setFocusAreas); }, []);
   useEffect(() => {
     setTodayLabel(new Intl.DateTimeFormat("sv-SE", { weekday: "long", day: "numeric", month: "long" }).format(new Date()).toUpperCase());
-  }, []);
-  useEffect(() => {
-    let disposed = false;
-    const loadWeather = async () => {
-      try {
-        const response = await fetch("/api/weather", { cache: "no-store" });
-        if (!response.ok) return;
-        const data = await response.json() as Weather;
-        if (!disposed) setWeather(data);
-      } catch {
-        // Behåll senast lyckade vädervärde om nätverket tillfälligt saknas.
-      }
-    };
-    const refreshOnFocus = () => { if (document.visibilityState === "visible") void loadWeather(); };
-    void loadWeather();
-    const interval = window.setInterval(() => { void loadWeather(); }, 10 * 60 * 1000);
-    document.addEventListener("visibilitychange", refreshOnFocus);
-    return () => {
-      disposed = true;
-      window.clearInterval(interval);
-      document.removeEventListener("visibilitychange", refreshOnFocus);
-    };
   }, []);
   useEffect(() => { reload(); }, [activeFocusId]);
 
@@ -152,16 +69,10 @@ export default function Home({ focusName }: { focusName?: string }) {
     router.push(`/focus/${toFocusSlug(newFocusName)}`);
   }
 
-  const roots = useMemo(() => items.filter((item) => item.parentId === null), [items]);
-  const childrenOf = (id: number) => items.filter((item) => item.parentId === id);
-  const isRootDone = (id: number) => {
-    const checkboxChildren = childrenOf(id).filter((child) => child.hasCheckbox === 1);
-    return checkboxChildren.length > 0 ? checkboxChildren.every((child) => child.completed === 1) : items.find((item) => item.id === id)?.completed === 1;
-  };
-  const isRootStarted = (id: number) => {
-    const checkboxChildren = childrenOf(id).filter((child) => child.hasCheckbox === 1);
-    return checkboxChildren.some((child) => child.completed === 1) && !checkboxChildren.every((child) => child.completed === 1);
-  };
+  const roots = useMemo(() => rootItems(items), [items]);
+  const childrenOf = (id: number) => getChildrenOf(items, id);
+  const isRootDone = (id: number) => getIsRootDone(items, id);
+  const isRootStarted = (id: number) => getIsRootStarted(items, id);
 
   async function createItem(event: FormEvent, parentId: number | null = null) {
     event.preventDefault();
@@ -208,14 +119,7 @@ export default function Home({ focusName }: { focusName?: string }) {
   }
 
   async function toggleMarkdownCheckbox(item: Item, index: number, checked: boolean) {
-    const checklistPattern = /(^|\n)(\s*[-*+]\s+)\[([ xX])\](?=\s)/g;
-    let matchIndex = 0;
-    const nextTitle = item.title.replace(checklistPattern, (_match, lineStart: string, prefix: string, currentState: string) => {
-      const isTarget = matchIndex === index;
-      const nextChecked = isTarget ? checked : currentState.toLowerCase() === "x";
-      matchIndex += 1;
-      return `${lineStart}${prefix}[${nextChecked ? "x" : " "}]`;
-    });
+    const nextTitle = toggleChecklistItem(item.title, index, checked);
     if (nextTitle === item.title) return;
     setItems((current) => current.map((currentItem) => currentItem.id === item.id ? { ...currentItem, title: nextTitle } : currentItem));
     const response = await fetch("/api/items", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: item.id, title: nextTitle }) });
@@ -237,10 +141,7 @@ export default function Home({ focusName }: { focusName?: string }) {
     setLlmLoading(true);
     setLlmError("");
     try {
-      const response = await fetch("/api/llm/format", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: value }) });
-      const result = await response.json() as { text?: string; error?: string };
-      if (!response.ok || !result.text) throw new Error(result.error || "AI-formateringen misslyckades.");
-      setValue(result.text);
+      setValue(await formatTextWithAi(value));
       setShowMarkdownPreview(false);
     } catch (error) {
       setLlmError(error instanceof Error ? error.message : "AI-formateringen misslyckades.");
@@ -249,15 +150,12 @@ export default function Home({ focusName }: { focusName?: string }) {
     }
   }
 
-  const visibleRoots = roots.filter((item) => threadView === "all" || (threadView === "active" ? !isRootDone(item.id) : isRootDone(item.id))).filter((item) => {
-    const query = searchQuery.trim().toLocaleLowerCase();
-    return !query || item.title.toLocaleLowerCase().includes(query) || childrenOf(item.id).some((child) => child.title.toLocaleLowerCase().includes(query));
-  });
+  const visibleRoots = roots.filter((item) => threadView === "all" || (threadView === "active" ? !isRootDone(item.id) : isRootDone(item.id))).filter((item) => itemMatchesQuery(item, items, searchQuery));
   useEffect(() => { setActiveMatch(0); }, [searchQuery]);
   useEffect(() => {
-    const query = searchQuery.trim().toLocaleLowerCase();
+    const query = normalizeSearchQuery(searchQuery);
     if (!query) return;
-    const matchingRoot = roots.find((item) => item.title.toLocaleLowerCase().includes(query) || childrenOf(item.id).some((child) => child.title.toLocaleLowerCase().includes(query)));
+    const matchingRoot = roots.find((item) => itemMatchesQuery(item, items, query));
     if (matchingRoot) setActiveId(matchingRoot.id);
   }, [searchQuery, items]);
   useEffect(() => {

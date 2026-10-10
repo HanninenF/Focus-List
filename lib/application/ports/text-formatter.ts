@@ -1,8 +1,1 @@
-export type FormatTodoTextRequest = {
-  text: string;
-  instructions: string;
-};
-
-export interface TextFormatter {
-  formatTodoText(request: FormatTodoTextRequest): Promise<string>;
-}
+export type { FormatTodoTextRequest, TextFormatter } from "@/src/core/ports/text-formatter";
