@@ -1,17 +1,37 @@
+type WeatherIconRange = Readonly<{ max: number; icon: string }>;
+const WEATHER_CODE_LIMITS = {
+  clear: 0,
+  partlyCloudy: 3,
+  fog: 48,
+  rain: 67,
+  snow: 77,
+  heavyRain: 82,
+  heavySnow: 94,
+  maximum: Number.POSITIVE_INFINITY,
+} as const;
+
+const dayIcons: WeatherIconRange[] = [
+  { max: WEATHER_CODE_LIMITS.clear, icon: "☀️" },
+  { max: WEATHER_CODE_LIMITS.partlyCloudy, icon: "⛅" },
+  { max: WEATHER_CODE_LIMITS.fog, icon: "🌫️" },
+  { max: WEATHER_CODE_LIMITS.rain, icon: "🌧️" },
+  { max: WEATHER_CODE_LIMITS.snow, icon: "🌨️" },
+  { max: WEATHER_CODE_LIMITS.heavyRain, icon: "🌧️" },
+  { max: WEATHER_CODE_LIMITS.heavySnow, icon: "🌨️" },
+  { max: WEATHER_CODE_LIMITS.maximum, icon: "⛈️" },
+];
+
+const nightIcons: WeatherIconRange[] = [
+  { max: WEATHER_CODE_LIMITS.clear, icon: "🌙" },
+  { max: WEATHER_CODE_LIMITS.partlyCloudy, icon: "🌙☁️" },
+  { max: WEATHER_CODE_LIMITS.fog, icon: "🌫️" },
+  { max: WEATHER_CODE_LIMITS.rain, icon: "🌧️" },
+  { max: WEATHER_CODE_LIMITS.snow, icon: "🌨️" },
+  { max: WEATHER_CODE_LIMITS.heavyRain, icon: "🌧️" },
+  { max: WEATHER_CODE_LIMITS.heavySnow, icon: "🌨️" },
+  { max: WEATHER_CODE_LIMITS.maximum, icon: "⛈️" },
+];
+
 export function weatherIcon(code: number, isDay: boolean) {
-  if (!isDay) {
-    if (code === 0) return "🌙";
-    if (code <= 3) return "🌙☁️";
-    if (code <= 48) return "🌫️";
-    if (code <= 67 || (code >= 80 && code <= 82)) return "🌧️";
-    if (code <= 77 || code >= 85) return "🌨️";
-    if (code >= 95) return "⛈️";
-  }
-  if (code === 0) return "☀️";
-  if (code <= 3) return "⛅";
-  if (code <= 48) return "🌫️";
-  if (code <= 67 || (code >= 80 && code <= 82)) return "🌧️";
-  if (code <= 77 || code >= 85) return "🌨️";
-  if (code >= 95) return "⛈️";
-  return "🌤️";
+  return (isDay ? dayIcons : nightIcons).find((range) => code <= range.max)?.icon ?? "🌤️";
 }
