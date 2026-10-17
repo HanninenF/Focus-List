@@ -33,5 +33,8 @@ const nightIcons: WeatherIconRange[] = [
 ];
 
 export function weatherIcon(code: number, isDay: boolean) {
-  return (isDay ? dayIcons : nightIcons).find((range) => code <= range.max)?.icon ?? "🌤️";
+  return (
+    (isDay ? dayIcons : nightIcons).find((range) => code <= range.max)?.icon ??
+    "🌤️"
+  );
 }

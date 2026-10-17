@@ -1,0 +1,42 @@
+.preview-button {
+  border: 0;
+  padding: 0;
+  color: #84b89a;
+  background: none;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.ai-format-button {
+  border: 1px solid #536e5e;
+  border-radius: 7px;
+  padding: 6px 9px;
+  color: #dce9df;
+  background: #243b2f;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.ai-format-button:hover:not(:disabled) {
+  border-color: #84b89a;
+  background: #315442;
+}
+
+.ai-format-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.llm-hint {
+  margin: 8px 0 0;
+  color: #84938a;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.llm-error {
+  margin: 8px 0 0;
+  color: #e3a29b;
+  font-size: 11px;
+  line-height: 1.4;
+}

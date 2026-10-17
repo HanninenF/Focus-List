@@ -1,0 +1,56 @@
+.intro {
+  justify-content: space-between;
+  margin: 58px 0 35px;
+}
+.intro h2 {
+  font:
+    600 29px "Playfair Display",
+    serif;
+  margin: 0 0 6px;
+  letter-spacing: -0.03em;
+}
+.intro p {
+  margin: 0;
+  color: #84938a;
+  font-size: 14px;
+}
+.progress {
+  width: 160px;
+}
+.progress span {
+  display: block;
+  font: 10px "DM Mono";
+  color: #718178;
+  letter-spacing: 0.1em;
+  margin-bottom: 7px;
+}
+.progress strong {
+  font-size: 20px;
+}
+.progress em {
+  font-style: normal;
+  color: #6f8178;
+  font-size: 13px;
+}
+.progress-bar {
+  height: 5px;
+  border-radius: 10px;
+  background: #293830;
+  margin-top: 9px;
+  overflow: hidden;
+}
+.progress-bar i {
+  height: 100%;
+  display: block;
+  background: #76a98a;
+  border-radius: 10px;
+  transition: width 0.3s;
+}
+@media (max-width: 760px) {
+  .intro {
+    margin-top: 42px;
+  }
+  .progress {
+    width: 125px;
+  }
+}

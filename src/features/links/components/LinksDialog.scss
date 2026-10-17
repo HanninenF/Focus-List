@@ -1,0 +1,77 @@
+.links-modal .MuiDialogContent-root {
+  max-height: min(65vh, 560px);
+}
+.links-list {
+  display: grid;
+  gap: 9px;
+  margin-bottom: 22px;
+}
+.links-empty {
+  margin: 4px 0;
+  color: #8da095;
+  font-size: 13px;
+}
+.link-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  border: 1px solid #304139;
+  border-radius: 9px;
+  padding: 11px 12px;
+  background: #0f1714;
+}
+.link-card-title {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  align-items: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-decoration: none;
+  color: #e8eee9;
+  font-size: 13px;
+}
+.link-card-title:hover {
+  color: #b7e2c2;
+}
+.link-card-actions,
+.link-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.link-card-actions button,
+.link-form-actions button {
+  border: 1px solid #385144;
+  border-radius: 7px;
+  padding: 7px 9px;
+  color: #a9d2b5;
+  background: transparent;
+  font-size: 11px;
+  cursor: pointer;
+}
+.link-card-actions button:last-child {
+  color: #e39b91;
+  border-color: #70453f;
+}
+.link-form {
+  display: grid;
+  gap: 8px;
+  border-top: 1px solid #304139;
+  padding-top: 17px;
+}
+.link-form h3 {
+  margin: 0 0 2px;
+  color: #dce9df;
+  font-size: 14px;
+}
+.link-form input {
+  border: 1px solid #304139;
+  border-radius: 8px;
+  padding: 10px;
+  color: #e8eee9;
+  background: #0f1714;
+  outline: 0;
+}

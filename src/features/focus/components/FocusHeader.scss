@@ -1,0 +1,166 @@
+.topbar,
+.intro,
+.list-head,
+.thread-row,
+.detail-actions,
+.top-actions {
+  display: flex;
+  align-items: center;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  justify-content: space-between;
+  padding: 12px 0;
+  background: var(--paper);
+}
+
+.date-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 10px;
+  min-width: 0;
+}
+
+.date-row .eyebrow {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.weather {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 4px;
+  color: #aebdb3;
+  font:
+    12px "DM Mono",
+    monospace;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.topbar h1 {
+  font-size: 30px;
+  letter-spacing: -0.05em;
+  margin: 0;
+  font-weight: 600;
+}
+
+.topbar h1 span {
+  color: var(--yellow);
+  font-size: 21px;
+  margin-left: 6px;
+}
+
+.top-actions {
+  gap: 17px;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #304139;
+  border-radius: 8px;
+  padding: 2px 5px 2px 9px;
+  background: var(--panel);
+}
+
+.search-box input {
+  width: 150px;
+  border: 0;
+  outline: 0;
+  color: var(--ink);
+  background: transparent;
+  font-size: 12px;
+}
+
+.search-box input::placeholder {
+  color: #718178;
+}
+
+.search-count {
+  min-width: 28px;
+  color: #91a098;
+  font: 11px "DM Mono";
+  text-align: center;
+}
+
+.search-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  border: 1px solid #304139;
+  border-radius: 8px;
+  padding: 2px;
+  background: var(--panel);
+}
+
+.search-nav button,
+.search-box button {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 6px;
+  padding: 0;
+  color: #9caf9f;
+  background: transparent;
+  cursor: pointer;
+}
+
+@media (max-width: 760px) {
+  .topbar h1 {
+    font-size: 26px;
+  }
+}
+
+.search-nav button {
+  font-size: 0;
+  background: #21342b;
+}
+
+.search-nav button:hover:not(:disabled),
+.search-box button:hover:not(:disabled) {
+  color: #f0f7f1;
+  background: #416c54;
+}
+
+.search-nav button::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-top: 2px solid currentColor;
+  border-left: 2px solid currentColor;
+}
+
+.search-nav button:first-child::before {
+  transform: translateY(2px) rotate(45deg);
+}
+
+.search-nav button:last-child::before {
+  transform: translateY(-2px) rotate(225deg);
+}
+
+.search-box button {
+  font-size: 18px;
+}
+
+.search-nav button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.icon-button {
+  border: 0;
+  background: none;
+  font-size: 26px;
+  color: #84958b;
+  cursor: pointer;
+}

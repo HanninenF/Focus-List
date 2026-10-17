@@ -8,5 +8,7 @@ data/*.sqlite
 data/*.sqlite-shm
 data/*.sqlite-wal
 data/*.log
+data/*.json
 .todo-threads-*.pid
 .todo-threads-launch.lock
+*.tsbuildinfo
