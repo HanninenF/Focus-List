@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 58321",
-    "build": "next build",
-    "start": "next start -p 58321",
-    "sonar": "sonar-scanner",
+    "dev": "node --use-system-ca node_modules/next/dist/bin/next dev -p 58321",
+    "build": "node --use-system-ca node_modules/next/dist/bin/next build",
+    "start": "node --use-system-ca node_modules/next/dist/bin/next start -p 58321",
+    "test": "vitest run",
+    "sonar": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\run-sonar.ps1",
     "sonar:issues": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\show-sonar-code-smells.ps1",
     "desktop-shortcut": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\create-desktop-shortcut.ps1"
   },
@@ -23,5 +24,11 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "typescript": "^5.7.2"
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2",
+    "sass": "^1.105.1",
+    "sonar-scanner": "^3.1.0",
+    "vitest": "^5.0.5"
   }
 }

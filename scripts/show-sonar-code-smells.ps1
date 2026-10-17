@@ -13,19 +13,26 @@ if ([string]::IsNullOrWhiteSpace($sonarToken)) {
 
 $sonarHeaders = @{ Authorization = "Bearer $sonarToken" }
 $encodedProjectKey = [Uri]::EscapeDataString($ProjectKey)
-$issuesUrl = "https://sonarcloud.io/api/issues/search?componentKeys=$encodedProjectKey&types=CODE_SMELL&resolved=false&ps=$PageSize"
+$issuesUrl = "https://sonarcloud.io/api/issues/search?componentKeys=$encodedProjectKey&resolved=false&ps=$PageSize"
 try {
   $issuesResponse = Invoke-RestMethod -Uri $issuesUrl -Headers $sonarHeaders -Method Get -ErrorAction Stop
 } catch {
-  throw "Kunde inte hämta code smells från SonarCloud: $($_.Exception.Message)"
+  throw "Kunde inte hämta öppna issues från SonarCloud: $($_.Exception.Message)"
 }
 
-Write-Output "Code smells för ${ProjectKey}: $($issuesResponse.total)"
+Write-Output "Öppna issues för ${ProjectKey}: $($issuesResponse.total)"
 if ($issuesResponse.issues.Count -eq 0) {
-  Write-Output "Inga öppna code smells hittades."
+  Write-Output "Inga öppna issues hittades."
   exit 0
 }
 
+Write-Output "`nSammanfattning per typ:"
 $issuesResponse.issues |
-  Select-Object rule, severity, message, component, line |
+  Group-Object type |
+  Select-Object Name, Count |
+  Format-Table -AutoSize
+
+Write-Output "Alla öppna issues:"
+$issuesResponse.issues |
+  Select-Object type, rule, severity, message, component, line |
   Format-Table -AutoSize -Wrap

@@ -8,6 +8,38 @@ $buildLogPath = Join-Path $logDirectory 'build.log'
 $appUrl = 'http://localhost:58321'
 $launchLockPath = Join-Path $repoRoot '.todo-threads-launch.lock'
 
+function Test-AppIsRunning {
+  try {
+    $htmlResponse = Invoke-WebRequest -Uri $appUrl -UseBasicParsing -TimeoutSec 2
+    if ($htmlResponse.StatusCode -ne 200) { return $false }
+
+    $stylesheet = [regex]::Match($htmlResponse.Content, 'href="([^"]+\.css[^"]*)"')
+    if (-not $stylesheet.Success) { return $false }
+
+    $stylesheetUrl = [System.Uri]::new([System.Uri]$appUrl, $stylesheet.Groups[1].Value).AbsoluteUri
+    $cssResponse = Invoke-WebRequest -Uri $stylesheetUrl -UseBasicParsing -TimeoutSec 2
+    return $cssResponse.StatusCode -eq 200 -and $cssResponse.Headers['Content-Type'] -like 'text/css*'
+  } catch {
+    return $false
+  }
+}
+
+function Get-AppListenerProcessId {
+  $connection = Get-NetTCPConnection -LocalPort 58321 -State Listen -ErrorAction SilentlyContinue |
+    Select-Object -First 1
+  if ($connection) { return [int]$connection.OwningProcess }
+
+  $netstatLine = netstat -ano 2>$null |
+    Select-String -Pattern '\sLISTENING\s+\d+\s*$' |
+    Where-Object { $_.Line -match ':58321\s' } |
+    Select-Object -First 1
+  if ($netstatLine) {
+    $parts = $netstatLine.Line.Trim() -split '\s+'
+    return [int]$parts[-1]
+  }
+  return $null
+}
+
 # The managed desktop environment may expose a disabled localhost proxy
 # (127.0.0.1:9). Do not let that proxy block the server-side LLM request.
 # Node also needs to trust the Windows certificate store for HTTPS calls.
@@ -28,7 +60,7 @@ if (Test-Path $launchLockPath) {
   } else {
     for ($attempt = 0; $attempt -lt 60; $attempt++) {
       try {
-        Invoke-WebRequest -Uri $appUrl -UseBasicParsing -TimeoutSec 2 | Out-Null
+        if (-not (Test-AppIsRunning)) { throw 'The running app is not healthy.' }
         Start-Process $appUrl
         exit 0
       } catch {
@@ -37,32 +69,6 @@ if (Test-Path $launchLockPath) {
     }
     Start-Process $appUrl
     exit 0
-  }
-}
-
-try {
-  New-Item -ItemType Directory -Path $launchLockPath -ErrorAction Stop | Out-Null
-} catch {
-  Start-Process $appUrl
-  exit 0
-}
-
-$existingPid = Get-Content $pidFilePath -ErrorAction SilentlyContinue | Select-Object -First 1
-if ($existingPid) {
-  try {
-    $existingProcess = Get-Process -Id ([int]$existingPid) -ErrorAction Stop
-    if ($existingProcess) {
-      try {
-        Invoke-WebRequest -Uri $appUrl -UseBasicParsing -TimeoutSec 2 | Out-Null
-        Remove-Item $launchLockPath -Recurse -Force -ErrorAction SilentlyContinue
-        Start-Process $appUrl
-        exit 0
-      } catch {
-        Remove-Item $pidFilePath -ErrorAction SilentlyContinue
-      }
-    }
-  } catch {
-    Remove-Item $pidFilePath -ErrorAction SilentlyContinue
   }
 }
 
@@ -80,6 +86,51 @@ if (-not $shouldBuild) {
   $build = Get-Item $buildIdPath
   if ($latestSource.LastWriteTime -gt $build.LastWriteTime) {
     $shouldBuild = $true
+  }
+}
+
+$listenerProcessId = Get-AppListenerProcessId
+if ($listenerProcessId) {
+  $listenerProcess = Get-Process -Id $listenerProcessId -ErrorAction SilentlyContinue
+  if (-not $shouldBuild -and (Test-AppIsRunning)) {
+    Set-Content -Path $pidFilePath -Value $listenerProcessId
+    Remove-Item $launchLockPath -Recurse -Force -ErrorAction SilentlyContinue
+    Start-Process $appUrl
+    exit 0
+  }
+  if ($listenerProcess) {
+    Stop-Process -Id $listenerProcess.Id -Force -ErrorAction SilentlyContinue
+    Start-Sleep -Milliseconds 300
+  }
+  Remove-Item $pidFilePath -ErrorAction SilentlyContinue
+}
+
+try {
+  New-Item -ItemType Directory -Path $launchLockPath -ErrorAction Stop | Out-Null
+} catch {
+  Start-Process $appUrl
+  exit 0
+}
+
+$existingPid = Get-Content $pidFilePath -ErrorAction SilentlyContinue | Select-Object -First 1
+if ($existingPid -and -not $shouldBuild) {
+  try {
+    $existingProcess = Get-Process -Id ([int]$existingPid) -ErrorAction Stop
+    if ($existingProcess) {
+      try {
+        if (-not (Test-AppIsRunning)) {
+          Stop-Process -Id $existingProcess.Id -Force -ErrorAction SilentlyContinue
+          throw 'The running app is not healthy.'
+        }
+        Remove-Item $launchLockPath -Recurse -Force -ErrorAction SilentlyContinue
+        Start-Process $appUrl
+        exit 0
+      } catch {
+        Remove-Item $pidFilePath -ErrorAction SilentlyContinue
+      }
+    }
+  } catch {
+    Remove-Item $pidFilePath -ErrorAction SilentlyContinue
   }
 }
 
@@ -103,7 +154,7 @@ Set-Content -Path $pidFilePath -Value $process.Id
 
 for ($attempt = 0; $attempt -lt 60; $attempt++) {
   try {
-    Invoke-WebRequest -Uri $appUrl -UseBasicParsing -TimeoutSec 2 | Out-Null
+    if (-not (Test-AppIsRunning)) { throw 'The server is not ready.' }
     Remove-Item $launchLockPath -Recurse -Force -ErrorAction SilentlyContinue
     Start-Process $appUrl
     exit 0

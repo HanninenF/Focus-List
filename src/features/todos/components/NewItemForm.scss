@@ -1,0 +1,25 @@
+.new-item {
+  display: flex;
+  align-items: center;
+  border: 1px solid #304139;
+  border-radius: 12px;
+  padding: 6px 7px 6px 14px;
+  background: var(--panel);
+  box-shadow: 0 4px 18px #00000025;
+}
+.new-item > span {
+  font-size: 22px;
+  color: #8cbd9b;
+  margin-right: 9px;
+}
+.new-item input {
+  border: 0;
+  outline: 0;
+  flex: 1;
+  font: 14px "DM Sans";
+  color: var(--ink);
+  background: transparent;
+}
+.new-item input::placeholder {
+  color: #718178;
+}

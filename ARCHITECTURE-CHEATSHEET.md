@@ -6,16 +6,16 @@ Fråga alltid:
 
 > Är detta presentation, appens regel, ett gränssnitt eller en teknisk implementation?
 
-| Om koden... | Lägg den i... |
-|---|---|
-| Visar UI, knappar, modaler eller formulär | `features/<feature>/components` |
-| Håller React-state eller kopplar UI till data | `features/<feature>/hooks` |
-| Beskriver en regel i appen | `core/domain` eller `features/<feature>/*-rules.ts` |
-| Utför ett användningsfall | `features/<feature>/*-service.ts` eller `application` |
-| Definierar vad en implementation måste kunna göra | `core/ports` |
-| Pratar med SQLite, HTTP, Gemini eller Open-Meteo | `infrastructure` |
-| Är generell UI eller generell hjälp | `shared/ui` eller `shared/utilities` |
-| Är en Next.js HTTP-ingång | `app/api` |
+| Om koden...                                       | Lägg den i...                                         |
+| ------------------------------------------------- | ----------------------------------------------------- |
+| Visar UI, knappar, modaler eller formulär         | `features/<feature>/components`                       |
+| Håller React-state eller kopplar UI till data     | `features/<feature>/hooks`                            |
+| Beskriver en regel i appen                        | `core/domain` eller `features/<feature>/*-rules.ts`   |
+| Utför ett användningsfall                         | `features/<feature>/*-service.ts` eller `application` |
+| Definierar vad en implementation måste kunna göra | `core/ports`                                          |
+| Pratar med SQLite, HTTP, Gemini eller Open-Meteo  | `infrastructure`                                      |
+| Är generell UI eller generell hjälp               | `shared/ui` eller `shared/utilities`                  |
+| Är en Next.js HTTP-ingång                         | `app/api`                                             |
 
 ## Beslutsträd
 
